@@ -5,7 +5,8 @@ def main():
         print("1. Add Expense")
         print("2. View Expenses")
         print("3. Search Expense")
-        print("4. Exit")
+        print("4. View Expense Statistics")
+        print("5. Exit")
         choice = input("Enter your choice: ")
         if choice == '1':
             addexpense()
@@ -14,6 +15,8 @@ def main():
         elif choice == '3':
             searchexpense()
         elif choice == '4':
+            print(stats())
+        elif choice == '5':
             break
         else:
             print("Invalid choice. Please try again.")
@@ -49,6 +52,7 @@ def csvfileappend(ID, Expense, Category, Amount, Date): #Add Expenses to file
             writer.writerow([ID, Expense, Category, Amount, Date])
     except FileNotFoundError:
         print(" Date not written in file. ")
+        print(stats())
 
 def csvfileread(): #View Expenses
     try:
@@ -57,8 +61,12 @@ def csvfileread(): #View Expenses
             reader = csv.reader(file)
             for iterate, read in enumerate(reader, start = 1):
                 ID, Expense, Category, Amount, Date = read
-                print(f"ID: {ID}, Name: {Expense}, Type: {Category}, Amount: {Amount}", sep=", ")
-                print("--------------------------------------------------")
+                print("============= EXPENSES =============")
+                print(f"ID , Name , Type , Amount , Date", sep=", ")
+                print("====================================")
+                print(f"{ID}  , {Expense} , {Category} , {Amount}    , {Date}", sep=", ")
+                print("====================================")
+                
     except FileNotFoundError:
         print(" Date not read from the file. ")
 
@@ -72,11 +80,11 @@ def searchexpense():
             for read in reader:
                 ID, Expense, Category, Amount, Date = read
                 if Expense.lower() == search.lower() or Category.lower() == search.lower():
-                    print("--------------------------------------------------")
+                    print("====================================")
                     print(f"ID , Name , Type , Amount , Date", sep=", ")
-                    print("--------------------------------------------------")
+                    print("====================================")
                     print(f"{ID}  , {Expense} , {Category} , {Amount}    , {Date}", sep=", ")
-                    print("--------------------------------------------------")
+                    print("====================================")
                     found = True
             if not found:
                 print("Expense not found.")
@@ -84,5 +92,26 @@ def searchexpense():
         print(" Date not read from the file. ")    
 
 
+def stats():
+    try:
+        with open("Personal Expense Tracker.csv", "r", newline='') as file:
+            reader = csv.reader(file)
+            total_expenses = 0
+            category_expenses = {}
+            for read in reader:
+                ID, Expense, Category, Amount, Date = read
+                total_expenses += float(Amount)
+                if Category in category_expenses:
+                    category_expenses[Category] += float(Amount)
+                else:
+                    category_expenses[Category] = float(Amount)
+            print("============= EXPENSE STATISTICS =============")
+            print(f"Total Expenses: {total_expenses}")
+            print("Expenses by Category:")
+            for category, amount in category_expenses.items():
+                print(f"{category}: {amount}")
+            print("===============================================")
+    except FileNotFoundError:
+        print(" Date not read from the file. ")
 
 main()
