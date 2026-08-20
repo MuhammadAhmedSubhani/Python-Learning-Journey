@@ -1,6 +1,4 @@
 import csv
-from os import name
-from unicodedata import category
 
 def main():
     while(True):
@@ -20,12 +18,35 @@ def main():
         else:
             print("Invalid choice. Please try again.")
 
-def csvfileappend(exp, cat, money, time): #Add Expenses to file
+def addexpense():
+    Expense = input("Expense name: ")
+    Category = input("Category name: ")
+    Amount = input("Amount: ")
+    Date = input("Date: ")
+    ID = increment()
+    csvfileappend(ID, Expense, Category, Amount, Date)
+
+
+def increment():
+    try:
+        with open("Personal Expense Tracker.csv", "r", newline='') as file:
+            reader = csv.reader(file)
+            rows = list(reader)
+            if rows:
+                last_id = int(rows[-1][0])
+                return last_id + 1
+            else:
+                return 1
+    except FileNotFoundError:
+        return 1
+    
+
+def csvfileappend(ID, Expense, Category, Amount, Date): #Add Expenses to file
     try:
         # append a row to a CSV file
         with open("Personal Expense Tracker.csv", "a", newline='') as file:
             writer = csv.writer(file)
-            writer.writerow([exp, cat, money, time])
+            writer.writerow([ID, Expense, Category, Amount, Date])
     except FileNotFoundError:
         print(" Date not written in file. ")
 
@@ -35,43 +56,33 @@ def csvfileread(): #View Expenses
         with open("Personal Expense Tracker.csv", "r", newline='') as file:
             reader = csv.reader(file)
             for iterate, read in enumerate(reader, start = 1):
-                Id, Nam, Type, mon = read
-                copy_data = [
-                    {
-                        "ID": Id, "Name": Nam, "category": Type, "Amount": mon
-                    }
-                ]
-                print(f"ID: {Id}, Name: {Nam}, Type: {Type}, Amount: {mon}")
+                ID, Expense, Category, Amount, Date = read
+                print(f"ID: {ID}, Name: {Expense}, Type: {Category}, Amount: {Amount}", sep=", ")
+                print("--------------------------------------------------")
     except FileNotFoundError:
         print(" Date not read from the file. ")
 
 def searchexpense():
-    while(True):
-        entry = input(" In order to search expense enter category or name of it:  ")
-        if not entry:
-            break
-        print(f"Searching for {entry} in the file...")
+    search = input("Enter the expense name or category to search: ")
+    print("Searching for expense...")
+    try:
+        with open("Personal Expense Tracker.csv", "r", newline='') as file:
+            reader = csv.reader(file)
+            found = False
+            for read in reader:
+                ID, Expense, Category, Amount, Date = read
+                if Expense.lower() == search.lower() or Category.lower() == search.lower():
+                    print("--------------------------------------------------")
+                    print(f"ID , Name , Type , Amount , Date", sep=", ")
+                    print("--------------------------------------------------")
+                    print(f"{ID}  , {Expense} , {Category} , {Amount}    , {Date}", sep=", ")
+                    print("--------------------------------------------------")
+                    found = True
+            if not found:
+                print("Expense not found.")
+    except FileNotFoundError:
+        print(" Date not read from the file. ")    
 
-        try:
-            with open("Personal Expense Tracker.csv", "r", newline='') as file:
-                reader = csv.reader(file)
-                found = False
-                for row in reader:
-                    if len(row) >= 2:
-                        if entry.lower() in row[0].lower() or entry.lower() in row[1].lower():
-                            print(f"Found {entry} in the file.")
-                            found = True
-                if not found:
-                    print(f"{entry} not found in the file.")
-        except FileNotFoundError:
-            print("Date not read from the file.")
 
 
-def addexpense():
-    Expense = input("Expense name: ")
-    Category = input("Category name: ")
-    Amount = input("Amount: ")
-    Date = input("Date: ")
-    csvfileappend(Expense, Category, Amount, Date)
-    
 main()
